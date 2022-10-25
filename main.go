@@ -8,6 +8,7 @@ import (
 	"go-micro.dev/v4"
 	"saas/governance/breaker"
 	"saas/governance/database"
+	"saas/governance/monitor"
 	"saas/governance/trace"
 
 	"saas/governance/config"
@@ -44,6 +45,9 @@ func main() {
 
 	// 熔断器
 	breaker.StartListening("0.0.0.0", "9092")
+
+	// 监控
+	monitor.PrometheusBoot(9192)
 
 	// micro服务
 	service := micro.NewService(

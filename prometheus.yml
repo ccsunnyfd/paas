@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s # 默认15秒采集一次
+  external_labels:
+    monitor: 'paas-monitor'
+scrape_configs:
+  - job_name: 'paas'
+    scrape_interval: 5s # 覆盖默认值
+    static_configs:
+      - targets: ['0.0.0.0:9192']
