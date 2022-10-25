@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
+	ratelimiter "github.com/go-micro/plugins/v4/wrapper/ratelimiter/uber"
 	opentracing2 "github.com/go-micro/plugins/v4/wrapper/trace/opentracing"
 	"github.com/opentracing/opentracing-go"
 	"go-micro.dev/v4"
+	"saas/governance/breaker"
 	"saas/governance/database"
 	"saas/governance/trace"
 
-	config "saas/governance/config"
+	"saas/governance/config"
 	"saas/governance/registry"
 )
 
@@ -40,6 +42,9 @@ func main() {
 	defer io.Close()
 	opentracing.SetGlobalTracer(t)
 
+	// 熔断器
+	breaker.StartListening("0.0.0.0", "9092")
+
 	// micro服务
 	service := micro.NewService(
 		micro.Name("paas"),
@@ -49,6 +54,10 @@ func main() {
 		// 链路追踪
 		micro.WrapHandler(opentracing2.NewHandlerWrapper(opentracing.GlobalTracer())),
 		micro.WrapClient(opentracing2.NewClientWrapper(opentracing.GlobalTracer())),
+		// 熔断，只作为客户端的时候起作用
+		micro.WrapClient(breaker.NewClientHystrixWrapper()),
+		// 限流，作为服务端的时候起作用
+		micro.WrapHandler(ratelimiter.NewHandlerWrapper(1000)),
 	)
 
 	service.Init()
