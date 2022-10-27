@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package pod.api.v1;
+
+option go_package = "github.com/ccsunnyfd/paas/pod/api/v1;v1";
+
+service Pod {
+  rpc AddPod(AddPodRequest) returns (AddPodResponse) {}
+  rpc DeletePod(DeletePodRequest) returns (DeletePodResponse) {}
+  rpc FindPodByID(FindPodByIDRequest) returns (FindPodByIDResponse) {}
+  rpc UpdatePod(UpdatePodRequest) returns (UpdatePodResponse) {}
+  rpc FindAllPods(FindAllPodsRequest) returns (FindAllPodsResponse) {}
+}
+
+
+message PodInfo {
+  int64 ID = 1;
+  string name = 2;
+  string namespace = 3;
+  string team_id = 4;
+  int32 replicas = 5;
+  float cpu_max = 6;
+  float cpu_min = 7;
+  float memory_max = 8;
+  float memory_min = 9;
+  repeated PodPort ports = 10;
+  repeated PodEnv envs = 11;
+  string pull_policy = 12;
+  string restart_Policy = 13;
+  string type = 14;
+  string image = 15;
+}
+
+message PodPort {
+  int64 ID = 1;
+  int64 Pod_ID = 2;
+  int32  Port = 3;
+  string protocol = 4;
+}
+
+message PodEnv {
+  int64 ID = 1;
+  int64 Pod_ID = 2;
+  string  Key = 3;
+  string  Val = 4;
+}
+
+message AddPodRequest {
+  PodInfo pod_info = 1;
+}
+
+message AddPodResponse {}
+
+message DeletePodRequest {
+  int64 ID = 1;
+}
+
+message DeletePodResponse {}
+
+message FindPodByIDRequest {
+  int64 ID = 1;
+}
+
+message FindPodByIDResponse {}
+
+message UpdatePodRequest {
+  PodInfo pod_info = 1;
+}
+
+message UpdatePodResponse {}
+
+message FindAllPodsRequest {}
+
+message FindAllPodsResponse {
+  repeated PodInfo pods = 1;
+}
