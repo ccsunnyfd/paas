@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	v14 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	"saas/internal/biz"
 	"strconv"
 )
@@ -18,11 +19,15 @@ type k8sRepo struct {
 	deployment   *v1.Deployment
 }
 
+func NewK8SRepo(k8sClientSet *kubernetes.Clientset) *k8sRepo {
+	return &k8sRepo{k8sClientSet: k8sClientSet}
+}
+
 // CreateToK8S 创建deployment
 func (k *k8sRepo) CreateToK8S(pod *biz.Pod) (err error) {
 	k.SetDeployment(pod)
 	if _, err = k.GetPodByName(pod); err != nil {
-		if _, err = k.k8sClientSet.AppsV1().Deployments(pod.Namespace).Create(
+		if _, err = k.deployments(pod.Namespace).Create(
 			context.TODO(), k.deployment, v12.CreateOptions{}); err != nil {
 			return err
 		}
@@ -38,7 +43,7 @@ func (k *k8sRepo) UpdateToK8S(pod *biz.Pod) (err error) {
 		log.Error(err)
 		return errors.New("Pod " + pod.Name + " 不存在请先创建")
 	}
-	if _, err = k.k8sClientSet.AppsV1().Deployments(pod.Namespace).Update(
+	if _, err = k.deployments(pod.Namespace).Update(
 		context.TODO(), k.deployment, v12.UpdateOptions{}); err != nil {
 		log.Error(err)
 		return err
@@ -48,7 +53,7 @@ func (k *k8sRepo) UpdateToK8S(pod *biz.Pod) (err error) {
 }
 
 func (k *k8sRepo) DeleteFromK8S(pod *biz.Pod) (err error) {
-	if err = k.k8sClientSet.AppsV1().Deployments(pod.Namespace).Delete(
+	if err = k.deployments(pod.Namespace).Delete(
 		context.TODO(), pod.Name, v12.DeleteOptions{}); err != nil {
 		log.Error(err)
 		return
@@ -107,8 +112,12 @@ func (k *k8sRepo) SetDeployment(pod *biz.Pod) {
 	k.deployment = deployment
 }
 
+func (k *k8sRepo) deployments(namespace string) v14.DeploymentInterface {
+	return k.k8sClientSet.AppsV1().Deployments(namespace)
+}
+
 func (k *k8sRepo) GetPodByName(pod *biz.Pod) (*v1.Deployment, error) {
-	return k.k8sClientSet.AppsV1().Deployments(pod.Namespace).Get(
+	return k.deployments(pod.Namespace).Get(
 		context.TODO(), pod.Name, v12.GetOptions{})
 }
 

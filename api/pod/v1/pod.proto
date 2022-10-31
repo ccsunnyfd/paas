@@ -49,7 +49,9 @@ message AddPodRequest {
   PodInfo pod_info = 1;
 }
 
-message AddPodResponse {}
+message AddPodResponse {
+  int64 ID = 1;
+}
 
 message DeletePodRequest {
   int64 ID = 1;

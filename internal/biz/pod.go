@@ -39,6 +39,7 @@ type PodEnv struct {
 }
 
 type PodRepo interface {
+	InitTable() error
 	Add(*Pod) (int64, error)
 	DeleteByID(int64) error
 	FindByID(int64) (*Pod, error)

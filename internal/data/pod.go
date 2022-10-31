@@ -1,6 +1,7 @@
 package data
 
 import (
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"gorm.io/gorm"
 	"saas/internal/biz"
 )
